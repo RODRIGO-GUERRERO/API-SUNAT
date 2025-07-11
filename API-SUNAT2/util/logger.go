@@ -1,9 +1,23 @@
 package util
 
 import (
-	. "API-SUNAT2/model"
 	"github.com/sirupsen/logrus"
 )
+
+// Definir OperationLog localmente si no está disponible en el modelo
+type OperationLog struct {
+	Timestamp     string
+	CorrelationID string
+	Level         string
+	Operation     string
+	DocumentType  string
+	DocumentID    string
+	Duration      int64
+	Status        string
+	Error         string
+	ErrorCode     string
+	StackTrace    string
+}
 
 type LogService struct {
 	logger *logrus.Logger

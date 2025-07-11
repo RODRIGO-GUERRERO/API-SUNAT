@@ -183,10 +183,13 @@ func (c *UBLConverter) convertToInvoice(doc *BusinessDocument) ([]byte, error) {
 	invoice := &UBLInvoice{
 		XMLName:       xml.Name{Local: "Invoice"},
 		Xmlns:         "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2",
+		XmlnsCbc:      "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
+		XmlnsCac:      "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2",
+		XmlnsExt:      "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2",
+		XmlnsDs:       "http://www.w3.org/2000/09/xmldsig#",
 		UBLExtensions: &UBLExtensions{
 			UBLExtension: UBLExtension{
 				ExtensionContent: ExtensionContent{
-					Signature: XMLSignature{}, // Se reemplazará luego por la firma real
 				},
 			},
 		},
@@ -220,7 +223,6 @@ func (c *UBLConverter) convertToInvoice(doc *BusinessDocument) ([]byte, error) {
 			Value:            doc.Currency,
 		},
 		LineCountNumeric:       len(doc.Items),
-		Note:                   "",
 		AccountingSupplierParty: c.convertParty(doc.Issuer),
 		AccountingCustomerParty: c.convertParty(doc.Customer),
 		PaymentTerms: []UBLPaymentTerms{
@@ -233,12 +235,15 @@ func (c *UBLConverter) convertToInvoice(doc *BusinessDocument) ([]byte, error) {
 		LegalMonetaryTotal: c.convertLegalMonetaryTotal(doc.Totals, doc.Currency),
 		InvoiceLines:       c.convertInvoiceLines(doc.Items, doc.Currency),
 	}
-	if doc.Type == "03" {
-		invoice.Note = "TRANSFERENCIA GRATUITA DE UN BIEN Y/O SERVICIO PRESTADO GRATUITAMENTE"
-	}
 	xmlData, err := xml.MarshalIndent(invoice, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("error marshaling invoice XML: %v", err)
+	}
+	// Guardar XML temporal para inspección
+	tempPath := "invoice_pre_firma.xml"
+	err = os.WriteFile(tempPath, append([]byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"), xmlData...), 0644)
+	if err != nil {
+		return nil, fmt.Errorf("error writing temp XML: %v", err)
 	}
 	xmlDeclaration := []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
 	return append(xmlDeclaration, xmlData...), nil
@@ -404,18 +409,18 @@ func (c *UBLConverter) convertParty(party Party) UBLParty {
 		schemeID = "1"
 	}
 	return UBLParty{
-		Party: UBLPartyDetail{
-			PartyIdentification: []UBLPartyIdentification{
-				{
-					ID: UBLIDWithScheme{
-						SchemeAgencyName: "PE:SUNAT",
-						SchemeID:         schemeID,
-						SchemeName:       "Documento de Identidad",
-						SchemeURI:        "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06",
-						Value:            party.DocumentID,
-					},
-				},
+		CustomerAssignedAccountID: party.DocumentID,
+		AdditionalAccountID:       schemeID,
+		PartyIdentification: UBLPartyIdentification{
+			ID: UBLIDWithScheme{
+				SchemeID:         schemeID,
+				SchemeName:       "SUNAT:Identificador de Documento de Identidad",
+				SchemeAgencyName: "PE:SUNAT",
+				Value:            party.DocumentID,
 			},
+		},
+		Party: UBLPartyDetail{
+			// PartyIdentification eliminado
 			PartyName: []UBLPartyName{
 				{Name: party.Name},
 			},
@@ -428,7 +433,7 @@ func (c *UBLConverter) convertParty(party Party) UBLParty {
 				AddressTypeCode: UBLIDWithScheme{
 					SchemeAgencyName: "PE:SUNAT",
 					SchemeName:       "Establecimientos anexos",
-					Value:          "0000",
+					Value:            "0000",
 				},
 				CityName:         party.Address.City,
 				CountrySubentity: party.Address.Province,
@@ -441,7 +446,7 @@ func (c *UBLConverter) convertParty(party Party) UBLParty {
 						SchemeAgencyName: "United Nations Economic Commission for Europe",
 						SchemeID:         "ISO 3166-1",
 						SchemeName:       "Country",
-						Value:          party.Address.Country,
+						Value:            party.Address.Country,
 					},
 				},
 			},
@@ -458,10 +463,9 @@ func (c *UBLConverter) convertParty(party Party) UBLParty {
 					TaxScheme: UBLTaxScheme{
 						ID: UBLIDWithScheme{
 							SchemeAgencyName: "PE:SUNAT",
-							SchemeID:         schemeID,
-							SchemeName:       "SUNAT:Identificador de Documento de Identidad",
-							SchemeURI:        "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06",
-							Value:            party.DocumentID,
+							SchemeID:         "UN/ECE 5153",
+							SchemeName:       "Codigo de tributos",
+							Value:            "1000",
 						},
 					},
 				},
@@ -478,7 +482,7 @@ func (c *UBLConverter) convertParty(party Party) UBLParty {
 						AddressTypeCode: UBLIDWithScheme{
 							SchemeAgencyName: "PE:SUNAT",
 							SchemeName:       "Establecimientos anexos",
-							Value:          "0000",
+							Value:            "0000",
 						},
 						CityName:         party.Address.City,
 						CountrySubentity: party.Address.Province,
@@ -491,7 +495,7 @@ func (c *UBLConverter) convertParty(party Party) UBLParty {
 								SchemeAgencyName: "United Nations Economic Commission for Europe",
 								SchemeID:         "ISO 3166-1",
 								SchemeName:       "Country",
-								Value:          party.Address.Country,
+								Value:            party.Address.Country,
 							},
 						},
 					},
@@ -510,17 +514,17 @@ func (c *UBLConverter) convertTaxTotals(taxes []TaxTotal, currency string) []UBL
 		taxTotal := UBLTaxTotal{
 			TaxAmount: UBLAmountWithCurrency{
 				CurrencyID: currency,
-				Value:      tax.TaxAmount,
+				Value:      Decimal2(tax.TaxAmount),
 			},
 			TaxSubtotals: []UBLTaxSubtotal{
 				{
 					TaxableAmount: UBLAmountWithCurrency{
 						CurrencyID: currency,
-						Value:      tax.TaxBase,
+						Value:      Decimal2(tax.TaxBase),
 					},
 					TaxAmount: UBLAmountWithCurrency{
 						CurrencyID: currency,
-						Value:      tax.TaxAmount,
+						Value:      Decimal2(tax.TaxAmount),
 					},
 					TaxCategory: UBLTaxCategory{
 						ID: UBLIDWithScheme{
@@ -571,15 +575,15 @@ func (c *UBLConverter) convertLegalMonetaryTotal(totals DocumentTotals, currency
 	return UBLLegalMonetaryTotal{
 		LineExtensionAmount: UBLAmountWithCurrency{
 			CurrencyID: currency,
-			Value:      totals.SubTotal,
+			Value:      Decimal2(totals.SubTotal),
 		},
 		TaxInclusiveAmount: UBLAmountWithCurrency{
 			CurrencyID: currency,
-			Value:      totals.TotalAmount,
+			Value:      Decimal2(totals.TotalAmount),
 		},
 		PayableAmount: UBLAmountWithCurrency{
 			CurrencyID: currency,
-			Value:      totals.PayableAmount,
+			Value:      Decimal2(totals.PayableAmount),
 		},
 	}
 }
@@ -593,17 +597,17 @@ func (c *UBLConverter) convertInvoiceLines(items []DocumentItem, currency string
 				UnitCode:                    item.UnitCode,
 				UnitCodeListAgencyName:      "United Nations Economic Commission for Europe",
 				UnitCodeListID:              "UN/ECE rec 20",
-				Value:                       item.Quantity,
+				Value:                       Decimal2(item.Quantity),
 			},
 			LineExtensionAmount: UBLAmountWithCurrency{
 				CurrencyID: currency,
-				Value:      item.LineTotal,
+				Value:      Decimal2(item.LineTotal),
 			},
 			PricingReference: &UBLPricingReference{
 				AlternativeConditionPrice: UBLAlternativeConditionPrice{
 					PriceAmount: UBLAmountWithCurrency{
 						CurrencyID: currency,
-						Value:      item.UnitPrice * item.Quantity,
+						Value:      Decimal2(item.UnitPrice * item.Quantity),
 					},
 					PriceTypeCode: UBLIDWithScheme{
 						SchemeAgencyName: "PE:SUNAT",
@@ -631,7 +635,7 @@ func (c *UBLConverter) convertInvoiceLines(items []DocumentItem, currency string
 			Price: UBLPrice{
 				PriceAmount: UBLAmountWithCurrency{
 					CurrencyID: currency,
-					Value:      item.UnitPrice,
+					Value:      Decimal2(item.UnitPrice),
 				},
 			},
 		}
@@ -649,17 +653,17 @@ func (c *UBLConverter) convertCreditNoteLines(items []DocumentItem, currency str
 				UnitCode:                    item.UnitCode,
 				UnitCodeListAgencyName:      "United Nations Economic Commission for Europe",
 				UnitCodeListID:              "UN/ECE rec 20",
-				Value:                       item.Quantity,
+				Value:                       Decimal2(item.Quantity),
 			},
 			LineExtensionAmount: UBLAmountWithCurrency{
 				CurrencyID: currency,
-				Value:      item.LineTotal,
+				Value:      Decimal2(item.LineTotal),
 			},
 			PricingReference: &UBLPricingReference{
 				AlternativeConditionPrice: UBLAlternativeConditionPrice{
 					PriceAmount: UBLAmountWithCurrency{
 						CurrencyID: currency,
-						Value:      item.UnitPrice * item.Quantity,
+						Value:      Decimal2(item.UnitPrice * item.Quantity),
 					},
 					PriceTypeCode: UBLIDWithScheme{
 						SchemeAgencyName: "PE:SUNAT",
@@ -687,7 +691,7 @@ func (c *UBLConverter) convertCreditNoteLines(items []DocumentItem, currency str
 			Price: UBLPrice{
 				PriceAmount: UBLAmountWithCurrency{
 					CurrencyID: currency,
-					Value:      item.UnitPrice,
+					Value:      Decimal2(item.UnitPrice),
 				},
 			},
 		}
@@ -705,17 +709,17 @@ func (c *UBLConverter) convertDebitNoteLines(items []DocumentItem, currency stri
 				UnitCode:                    item.UnitCode,
 				UnitCodeListAgencyName:      "United Nations Economic Commission for Europe",
 				UnitCodeListID:              "UN/ECE rec 20",
-				Value:                       item.Quantity,
+				Value:                       Decimal2(item.Quantity),
 			},
 			LineExtensionAmount: UBLAmountWithCurrency{
 				CurrencyID: currency,
-				Value:      item.LineTotal,
+				Value:      Decimal2(item.LineTotal),
 			},
 			PricingReference: &UBLPricingReference{
 				AlternativeConditionPrice: UBLAlternativeConditionPrice{
 					PriceAmount: UBLAmountWithCurrency{
 						CurrencyID: currency,
-						Value:      item.UnitPrice * item.Quantity,
+						Value:      Decimal2(item.UnitPrice * item.Quantity),
 					},
 					PriceTypeCode: UBLIDWithScheme{
 						SchemeAgencyName: "PE:SUNAT",
@@ -743,7 +747,7 @@ func (c *UBLConverter) convertDebitNoteLines(items []DocumentItem, currency stri
 			Price: UBLPrice{
 				PriceAmount: UBLAmountWithCurrency{
 					CurrencyID: currency,
-					Value:      item.UnitPrice,
+					Value:      Decimal2(item.UnitPrice),
 				},
 			},
 		}
@@ -758,17 +762,17 @@ func (c *UBLConverter) convertItemTaxes(taxes []Tax, currency string) []UBLTaxTo
 		taxTotal := UBLTaxTotal{
 			TaxAmount: UBLAmountWithCurrency{
 				CurrencyID: currency,
-				Value:      tax.TaxAmount,
+				Value:      Decimal2(tax.TaxAmount),
 			},
 			TaxSubtotals: []UBLTaxSubtotal{
 				{
 					TaxableAmount: UBLAmountWithCurrency{
 						CurrencyID: currency,
-						Value:      tax.TaxBase,
+						Value:      Decimal2(tax.TaxBase),
 					},
 					TaxAmount: UBLAmountWithCurrency{
 						CurrencyID: currency,
-						Value:      tax.TaxAmount,
+						Value:      Decimal2(tax.TaxAmount),
 					},
 					TaxCategory: UBLTaxCategory{
 						ID: UBLIDWithScheme{

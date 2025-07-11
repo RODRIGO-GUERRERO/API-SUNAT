@@ -75,6 +75,7 @@ func (s *DigitalSignatureService) SignXML(xmlContent []byte, certPEM []byte, key
 
 	// Crear estructura XMLDSig
 	xmlSignature := &XMLSignature{
+		Id: "SignatureSP",
 		SignedInfo: SignedInfo{
 			CanonicalizationMethod: CanonicalizationMethod{
 				Algorithm: "http://www.w3.org/2001/10/xml-exc-c14n#",
@@ -133,7 +134,16 @@ func (s *DigitalSignatureService) insertSignatureInXML(xmlContent []byte, xmlSig
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal UBL extensions: %v", err)
 	}
-
+	// Forzar el prefijo ext: en la apertura y cierre si se pierde
+	extensionsStr := string(extensionsXML)
+	if strings.HasPrefix(extensionsStr, "<UBLExtensions") {
+		extensionsStr = strings.Replace(extensionsStr, "<UBLExtensions", "<ext:UBLExtensions", 1)
+	}
+	if strings.HasSuffix(extensionsStr, "</UBLExtensions>") {
+		extensionsStr = strings.TrimSuffix(extensionsStr, "</UBLExtensions>") + "</ext:UBLExtensions>"
+	} else {
+		extensionsStr = strings.Replace(extensionsStr, "</UBLExtensions>", "</ext:UBLExtensions>", 1)
+	}
 	// Buscar el bloque <ext:UBLExtensions> existente y reemplazarlo
 	startTag := "<ext:UBLExtensions>"
 	endTag := "</ext:UBLExtensions>"
@@ -143,9 +153,7 @@ func (s *DigitalSignatureService) insertSignatureInXML(xmlContent []byte, xmlSig
 		return nil, fmt.Errorf("No se encontró el bloque <ext:UBLExtensions> en el XML")
 	}
 	endIdx += len(endTag)
-
 	// Reemplazar el bloque existente por el firmado
-	replacedXML := xmlStr[:startIdx] + string(extensionsXML) + xmlStr[endIdx:]
-
+	replacedXML := xmlStr[:startIdx] + extensionsStr + xmlStr[endIdx:]
 	return []byte(replacedXML), nil
 } 

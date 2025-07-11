@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/xml"
+	"fmt"
 	"time"
 )
 
@@ -86,6 +87,10 @@ type DocumentReference struct {
 type UBLInvoice struct {
 	XMLName                xml.Name               `xml:"Invoice"`
 	Xmlns                  string                 `xml:"xmlns,attr"`
+	XmlnsCbc               string                 `xml:"xmlns:cbc,attr"`
+	XmlnsCac               string                 `xml:"xmlns:cac,attr"`
+	XmlnsExt               string                 `xml:"xmlns:ext,attr"`
+	XmlnsDs                string                 `xml:"xmlns:ds,attr"`
 	UBLExtensions          *UBLExtensions         `xml:"ext:UBLExtensions"`
 	UBLVersionID           string                 `xml:"cbc:UBLVersionID"`
 	CustomizationID        UBLIDWithScheme        `xml:"cbc:CustomizationID"`
@@ -97,7 +102,6 @@ type UBLInvoice struct {
 	InvoiceTypeCode        UBLTypeCode            `xml:"cbc:InvoiceTypeCode"`
 	DocumentCurrencyCode   UBLIDWithScheme        `xml:"cbc:DocumentCurrencyCode"`
 	LineCountNumeric       int                    `xml:"cbc:LineCountNumeric"`
-	Note                   string                 `xml:"cbc:Note,omitempty"`
 	AccountingSupplierParty UBLParty              `xml:"cac:AccountingSupplierParty"`
 	AccountingCustomerParty UBLParty              `xml:"cac:AccountingCustomerParty"`
 	PaymentTerms           []UBLPaymentTerms      `xml:"cac:PaymentTerms,omitempty"`
@@ -172,12 +176,15 @@ type ExtensionContent struct {
 	Signature XMLSignature `xml:"ds:Signature"`
 }
 
+// Modificar UBLParty para SUNAT
 type UBLParty struct {
-	Party UBLPartyDetail `xml:"cac:Party"`
+	CustomerAssignedAccountID string `xml:"cbc:CustomerAssignedAccountID"`
+	AdditionalAccountID       string `xml:"cbc:AdditionalAccountID"`
+	PartyIdentification      UBLPartyIdentification `xml:"cac:PartyIdentification"`
+	Party                    UBLPartyDetail `xml:"cac:Party"`
 }
 
 type UBLPartyDetail struct {
-	PartyIdentification []UBLPartyIdentification `xml:"cac:PartyIdentification"`
 	PartyName           []UBLPartyName           `xml:"cac:PartyName"`
 	RegistrationAddress UBLRegistrationAddress   `xml:"cac:RegistrationAddress"`
 	PartyTaxScheme      []UBLPartyTaxScheme      `xml:"cac:PartyTaxScheme"`
@@ -245,9 +252,17 @@ type UBLTaxTotal struct {
 	TaxSubtotals  []UBLTaxSubtotal      `xml:"cac:TaxSubtotal"`
 }
 
+// Tipo para serializar siempre con dos decimales
+type Decimal2 float64
+
+func (d Decimal2) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	value := fmt.Sprintf("%.2f", float64(d))
+	return e.EncodeElement(value, start)
+}
+
 type UBLAmountWithCurrency struct {
-	CurrencyID string  `xml:"currencyID,attr"`
-	Value      float64 `xml:",chardata"`
+	CurrencyID string   `xml:"currencyID,attr"`
+	Value      Decimal2 `xml:",chardata"`
 }
 
 type UBLTaxSubtotal struct {
@@ -290,10 +305,10 @@ type UBLCreditNoteLine struct {
 }
 
 type UBLQuantityWithUnit struct {
-	UnitCode                    string `xml:"unitCode,attr"`
-	UnitCodeListAgencyName      string `xml:"unitCodeListAgencyName,attr,omitempty"`
-	UnitCodeListID              string `xml:"unitCodeListID,attr,omitempty"`
-	Value                       float64 `xml:",chardata"`
+	UnitCode                    string   `xml:"unitCode,attr"`
+	UnitCodeListAgencyName      string   `xml:"unitCodeListAgencyName,attr,omitempty"`
+	UnitCodeListID              string   `xml:"unitCodeListID,attr,omitempty"`
+	Value                       Decimal2 `xml:",chardata"`
 }
 
 type UBLPricingReference struct {
@@ -369,6 +384,8 @@ type UBLDebitNoteLine struct {
 
 // Estructura para la firma digital
 type XMLSignature struct {
+	XMLName         xml.Name        `xml:"ds:Signature"`
+	Id              string          `xml:"Id,attr"`
 	SignedInfo      SignedInfo      `xml:"ds:SignedInfo"`
 	SignatureValue  SignatureValue  `xml:"ds:SignatureValue"`
 	KeyInfo         KeyInfo         `xml:"ds:KeyInfo"`
@@ -419,9 +436,7 @@ type X509Data struct {
 	X509Certificate string `xml:"ds:X509Certificate"`
 }
 
-// ============================================================================
-// ESTRUCTURAS DE RESPUESTA
-// ============================================================================
+// Eliminar la definición de UBLSignature y sus dependencias
 
 type APIResponse struct {
 	Status        string                 `json:"status"`
@@ -445,17 +460,3 @@ type ValidationError struct {
 	Rule     string `json:"rule"`
 	Message  string `json:"message"`
 }
-
-type OperationLog struct {
-	Timestamp     time.Time `json:"timestamp"`
-	CorrelationID string    `json:"correlationId"`
-	Level         string    `json:"level"`
-	Operation     string    `json:"operation"`
-	DocumentType  string    `json:"documentType"`
-	DocumentID    string    `json:"documentId"`
-	Duration      int64     `json:"duration,omitempty"`
-	Status        string    `json:"status"`
-	Error         string    `json:"error,omitempty"`
-	ErrorCode     string    `json:"errorCode,omitempty"`
-	StackTrace    string    `json:"stackTrace,omitempty"`
-} 
