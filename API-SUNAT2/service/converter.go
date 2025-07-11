@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	. "API-SUNAT2/model"
@@ -75,19 +74,6 @@ func (s *UBLConverterService) ProcessDocument(doc *BusinessDocument, certPEM, ke
 			ProcessedAt:   time.Now(),
 			ErrorCode:     "CONVERSION_FAILED",
 			ErrorMessage:  fmt.Sprintf("Error en conversión UBL: %v", err),
-		}, nil
-	}
-
-	// Agregar firma UBL al XML
-	xmlData, err = s.addUBLSignature(xmlData, doc)
-	if err != nil {
-		s.logService.LogError(correlationID, "UBL_SIGNATURE_ERROR", doc.Type, fmt.Sprintf("%s-%s", doc.Series, doc.Number), "UBL_SIGNATURE_FAILED", err.Error())
-		return &APIResponse{
-			Status:        "ERROR",
-			CorrelationID: correlationID,
-			ProcessedAt:   time.Now(),
-			ErrorCode:     "UBL_SIGNATURE_FAILED",
-			ErrorMessage:  fmt.Sprintf("Error al agregar firma UBL: %v", err),
 		}, nil
 	}
 
@@ -164,48 +150,6 @@ func (s *UBLConverterService) ProcessDocument(doc *BusinessDocument, certPEM, ke
 	return response, nil
 }
 
-func (s *UBLConverterService) addUBLSignature(xmlData []byte, doc *BusinessDocument) ([]byte, error) {
-	// Crear firma UBL
-	ublSignature := &UBLSignature{
-		ID: fmt.Sprintf("%s-%s", doc.Series, doc.Number),
-		SignatoryParty: UBLSignatoryParty{
-			PartyIdentification: UBLPartyIdentification{
-				ID: UBLIDWithScheme{
-					Value: doc.Issuer.DocumentID,
-				},
-			},
-			PartyName: UBLPartyName{
-				Name: doc.Issuer.Name,
-			},
-		},
-		DigitalSignatureAttachment: UBLDigitalSignatureAttachment{
-			ExternalReference: UBLExternalReference{
-				URI: "#SignatureSP",
-			},
-		},
-	}
-
-	// Convertir XML a string para manipulación
-	xmlStr := string(xmlData)
-
-	// Buscar la posición después de UBLVersionID para insertar la firma
-	ublVersionEnd := strings.Index(xmlStr, "</cbc:UBLVersionID>")
-	if ublVersionEnd == -1 {
-		return nil, fmt.Errorf("UBLVersionID not found")
-	}
-
-	// Crear XML de la firma UBL
-	signatureXML, err := xml.MarshalIndent(ublSignature, "", "  ")
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal UBL signature: %v", err)
-	}
-
-	// Insertar la firma después de UBLVersionID
-	xmlStr = xmlStr[:ublVersionEnd+len("</cbc:UBLVersionID>")] + "\n" + string(signatureXML) + xmlStr[ublVersionEnd+len("</cbc:UBLVersionID>"):]
-
-	return []byte(xmlStr), nil
-}
-
 func getFileSize(filePath string) int64 {
 	info, err := os.Stat(filePath)
 	if err != nil {
@@ -277,7 +221,6 @@ func (c *UBLConverter) convertToInvoice(doc *BusinessDocument) ([]byte, error) {
 		},
 		LineCountNumeric:       len(doc.Items),
 		Note:                   "",
-		Signature:              c.createUBLSignature(doc),
 		AccountingSupplierParty: c.convertParty(doc.Issuer),
 		AccountingCustomerParty: c.convertParty(doc.Customer),
 		PaymentTerms: []UBLPaymentTerms{
@@ -340,7 +283,6 @@ func (c *UBLConverter) convertToCreditNote(doc *BusinessDocument) ([]byte, error
 		LineCountNumeric:       len(doc.Items),
 		DiscrepancyResponse:    []UBLDiscrepancyResponse{},
 		BillingReference:       []UBLBillingReference{},
-		Signature:              nil,
 		AccountingSupplierParty: c.convertParty(doc.Issuer),
 		AccountingCustomerParty: c.convertParty(doc.Customer),
 		PaymentTerms: []UBLPaymentTerms{
@@ -418,7 +360,6 @@ func (c *UBLConverter) convertToDebitNote(doc *BusinessDocument) ([]byte, error)
 		LineCountNumeric:       len(doc.Items),
 		DiscrepancyResponse:    []UBLDiscrepancyResponse{},
 		BillingReference:       []UBLBillingReference{},
-		Signature:              nil,
 		AccountingSupplierParty: c.convertParty(doc.Issuer),
 		AccountingCustomerParty: c.convertParty(doc.Customer),
 		PaymentTerms: []UBLPaymentTerms{
@@ -455,27 +396,6 @@ func (c *UBLConverter) convertToDebitNote(doc *BusinessDocument) ([]byte, error)
 	}
 	xmlDeclaration := []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
 	return append(xmlDeclaration, xmlData...), nil
-}
-
-func (c *UBLConverter) createUBLSignature(doc *BusinessDocument) *UBLSignature {
-	return &UBLSignature{
-		ID: fmt.Sprintf("%s-%s", doc.Series, doc.Number),
-		SignatoryParty: UBLSignatoryParty{
-			PartyIdentification: UBLPartyIdentification{
-				ID: UBLIDWithScheme{
-					Value: doc.Issuer.DocumentID,
-				},
-			},
-			PartyName: UBLPartyName{
-				Name: doc.Issuer.Name,
-			},
-		},
-		DigitalSignatureAttachment: UBLDigitalSignatureAttachment{
-			ExternalReference: UBLExternalReference{
-				URI: "#SignatureSP",
-			},
-		},
-	}
 }
 
 func (c *UBLConverter) convertParty(party Party) UBLParty {

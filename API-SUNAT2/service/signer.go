@@ -128,20 +128,24 @@ func (s *DigitalSignatureService) insertSignatureInXML(xmlContent []byte, xmlSig
 		},
 	}
 
-	// Insertar UBLExtensions después de la declaración XML
+	// Serializar el nuevo bloque UBLExtensions
 	extensionsXML, err := xml.MarshalIndent(ublExtensions, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal UBL extensions: %v", err)
 	}
 
-	// Buscar la posición después de la declaración XML
-	xmlDeclEnd := strings.Index(xmlStr, "?>")
-	if xmlDeclEnd == -1 {
-		return nil, fmt.Errorf("XML declaration not found")
+	// Buscar el bloque <ext:UBLExtensions> existente y reemplazarlo
+	startTag := "<ext:UBLExtensions>"
+	endTag := "</ext:UBLExtensions>"
+	startIdx := strings.Index(xmlStr, startTag)
+	endIdx := strings.Index(xmlStr, endTag)
+	if startIdx == -1 || endIdx == -1 {
+		return nil, fmt.Errorf("No se encontró el bloque <ext:UBLExtensions> en el XML")
 	}
+	endIdx += len(endTag)
 
-	// Insertar UBLExtensions después de la declaración XML
-	xmlStr = xmlStr[:xmlDeclEnd+2] + "\n" + string(extensionsXML) + xmlStr[xmlDeclEnd+2:]
+	// Reemplazar el bloque existente por el firmado
+	replacedXML := xmlStr[:startIdx] + string(extensionsXML) + xmlStr[endIdx:]
 
-	return []byte(xmlStr), nil
+	return []byte(replacedXML), nil
 } 

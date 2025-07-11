@@ -98,7 +98,6 @@ type UBLInvoice struct {
 	DocumentCurrencyCode   UBLIDWithScheme        `xml:"cbc:DocumentCurrencyCode"`
 	LineCountNumeric       int                    `xml:"cbc:LineCountNumeric"`
 	Note                   string                 `xml:"cbc:Note,omitempty"`
-	Signature              *UBLSignature          `xml:"cac:Signature"`
 	AccountingSupplierParty UBLParty              `xml:"cac:AccountingSupplierParty"`
 	AccountingCustomerParty UBLParty              `xml:"cac:AccountingCustomerParty"`
 	PaymentTerms           []UBLPaymentTerms      `xml:"cac:PaymentTerms,omitempty"`
@@ -126,7 +125,6 @@ type UBLCreditNote struct {
 	LineCountNumeric       int                    `xml:"cbc:LineCountNumeric"`
 	DiscrepancyResponse    []UBLDiscrepancyResponse `xml:"cac:DiscrepancyResponse"`
 	BillingReference       []UBLBillingReference  `xml:"cac:BillingReference"`
-	Signature              *UBLSignature          `xml:"cac:Signature,omitempty"`
 	AccountingSupplierParty UBLParty              `xml:"cac:AccountingSupplierParty"`
 	AccountingCustomerParty UBLParty              `xml:"cac:AccountingCustomerParty"`
 	PaymentTerms           []UBLPaymentTerms      `xml:"cac:PaymentTerms,omitempty"`
@@ -154,7 +152,6 @@ type UBLDebitNote struct {
 	LineCountNumeric       int                    `xml:"cbc:LineCountNumeric"`
 	DiscrepancyResponse    []UBLDiscrepancyResponse `xml:"cac:DiscrepancyResponse"`
 	BillingReference       []UBLBillingReference  `xml:"cac:BillingReference"`
-	Signature              *UBLSignature          `xml:"cac:Signature,omitempty"`
 	AccountingSupplierParty UBLParty              `xml:"cac:AccountingSupplierParty"`
 	AccountingCustomerParty UBLParty              `xml:"cac:AccountingCustomerParty"`
 	PaymentTerms           []UBLPaymentTerms      `xml:"cac:PaymentTerms,omitempty"`
@@ -173,25 +170,6 @@ type UBLExtension struct {
 
 type ExtensionContent struct {
 	Signature XMLSignature `xml:"ds:Signature"`
-}
-
-type UBLSignature struct {
-	ID                    string                `xml:"cbc:ID"`
-	SignatoryParty        UBLSignatoryParty     `xml:"cac:SignatoryParty"`
-	DigitalSignatureAttachment UBLDigitalSignatureAttachment `xml:"cac:DigitalSignatureAttachment"`
-}
-
-type UBLSignatoryParty struct {
-	PartyIdentification UBLPartyIdentification `xml:"cac:PartyIdentification"`
-	PartyName           UBLPartyName           `xml:"cac:PartyName"`
-}
-
-type UBLDigitalSignatureAttachment struct {
-	ExternalReference UBLExternalReference `xml:"cac:ExternalReference"`
-}
-
-type UBLExternalReference struct {
-	URI string `xml:"cbc:URI"`
 }
 
 type UBLParty struct {
