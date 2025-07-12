@@ -8,6 +8,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
+	"encoding/xml"
 	"fmt"
 	"strings"
 
@@ -119,73 +120,59 @@ func (s *DigitalSignatureService) insertSignatureInXML(xmlContent []byte, xmlSig
 	// Convertir XML a string para manipulación
 	xmlStr := string(xmlContent)
 
-	// Crear el bloque UBLExtensions completo con la firma XMLDSig
-	extensionsXML := fmt.Sprintf(`<UBLExtensions xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
-  <UBLExtension>
-    <ExtensionContent>
-      <Signature xmlns="http://www.w3.org/2000/09/xmldsig#" Id="%s">
-        <SignedInfo>
-          <CanonicalizationMethod Algorithm="%s"/>
-          <SignatureMethod Algorithm="%s"/>
-          <Reference URI="%s">
-            <Transforms>
-              <Transform Algorithm="%s"/>
-              <Transform Algorithm="%s"/>
-            </Transforms>
-            <DigestMethod Algorithm="%s"/>
-            <DigestValue>%s</DigestValue>
-          </Reference>
-        </SignedInfo>
-        <SignatureValue>%s</SignatureValue>
-        <KeyInfo>
-          <X509Data>
-            <X509Certificate>%s</X509Certificate>
-          </X509Data>
-        </KeyInfo>
-      </Signature>
-    </ExtensionContent>
-  </UBLExtension>
-</UBLExtensions>`,
-		xmlSignature.Id,
-		xmlSignature.SignedInfo.CanonicalizationMethod.Algorithm,
-		xmlSignature.SignedInfo.SignatureMethod.Algorithm,
-		xmlSignature.SignedInfo.Reference.URI,
-		xmlSignature.SignedInfo.Reference.Transforms.Transform[0].Algorithm,
-		xmlSignature.SignedInfo.Reference.Transforms.Transform[1].Algorithm,
-		xmlSignature.SignedInfo.Reference.DigestMethod.Algorithm,
-		xmlSignature.SignedInfo.Reference.DigestValue,
-		xmlSignature.SignatureValue.Value,
-		xmlSignature.KeyInfo.X509Data.X509Certificate,
-	)
+	// Crear el bloque UBLExtensions completo con la firma XMLDSig usando las estructuras Go
+	extensions := &UBLExtensions{
+		UBLExtension: []UBLExtension{
+			{
+				ExtensionContent: ExtensionContent{
+					Signature: xmlSignature,
+				},
+			},
+		},
+	}
 
-	// Buscar el bloque UBLExtensions existente (con namespace completo)
-	startTag := "<UBLExtensions"
-	endTag := "</UBLExtensions>"
+	// Serializar las extensiones a XML
+	extensionsXML, err := xml.MarshalIndent(extensions, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("error al serializar extensiones: %v", err)
+	}
+
+	// Buscar el bloque UBLExtensions existente con prefijo ext:
+	startTag := "<ext:UBLExtensions"
+	endTag := "</ext:UBLExtensions>"
 	startIdx := strings.Index(xmlStr, startTag)
 	endIdx := strings.Index(xmlStr, endTag)
 	
 	if startIdx == -1 || endIdx == -1 {
-		// Si no encuentra con namespace completo, intentar con prefijo ext:
-		startTag = "<ext:UBLExtensions"
-		endTag = "</ext:UBLExtensions>"
-		startIdx = strings.Index(xmlStr, startTag)
-		endIdx = strings.Index(xmlStr, endTag)
-		
-		if startIdx == -1 || endIdx == -1 {
-			return nil, fmt.Errorf("No se encontró el bloque UBLExtensions en el XML")
+		// Si no existe el bloque UBLExtensions, insertarlo después del tag de apertura del Invoice
+		invoiceStartTag := "<Invoice"
+		invoiceStartIdx := strings.Index(xmlStr, invoiceStartTag)
+		if invoiceStartIdx == -1 {
+			return nil, fmt.Errorf("No se encontró el tag Invoice en el XML")
 		}
+		
+		// Encontrar el final del tag Invoice
+		invoiceEndIdx := strings.Index(xmlStr[invoiceStartIdx:], ">")
+		if invoiceEndIdx == -1 {
+			return nil, fmt.Errorf("No se encontró el cierre del tag Invoice")
+		}
+		insertPos := invoiceStartIdx + invoiceEndIdx + 1
+		
+		// Insertar el bloque UBLExtensions después del tag Invoice
+		replacedXML := xmlStr[:insertPos] + "\n  " + string(extensionsXML) + "\n" + xmlStr[insertPos:]
+		return []byte(replacedXML), nil
 	}
 	
 	// Encontrar el final del tag de apertura
 	tagEndIdx := strings.Index(xmlStr[startIdx:], ">")
 	if tagEndIdx == -1 {
-		return nil, fmt.Errorf("No se encontró el cierre del tag UBLExtensions")
+		return nil, fmt.Errorf("No se encontró el cierre del tag ext:UBLExtensions")
 	}
 	startIdx += tagEndIdx + 1
 	
 	endIdx += len(endTag)
 	
 	// Reemplazar el bloque existente por el firmado
-	replacedXML := xmlStr[:startIdx] + extensionsXML + xmlStr[endIdx:]
+	replacedXML := xmlStr[:startIdx] + string(extensionsXML) + xmlStr[endIdx:]
 	return []byte(replacedXML), nil
 } 
