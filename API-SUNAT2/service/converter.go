@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	. "API-SUNAT2/model"
@@ -181,72 +182,61 @@ func (c *UBLConverter) ConvertToUBL(doc *BusinessDocument) ([]byte, error) {
 
 func (c *UBLConverter) convertToInvoice(doc *BusinessDocument) ([]byte, error) {
 	invoice := &UBLInvoice{
-		XMLName:       xml.Name{Local: "Invoice"},
-		Xmlns:         "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2",
-		XmlnsCbc:      "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
-		XmlnsCac:      "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2",
-		XmlnsExt:      "urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2",
-		XmlnsDs:       "http://www.w3.org/2000/09/xmldsig#",
+		XMLName: xml.Name{Local: "Invoice"},
 		UBLExtensions: &UBLExtensions{
-			UBLExtension: UBLExtension{
-				ExtensionContent: ExtensionContent{
+			UBLExtension: []UBLExtension{},
+		},
+		UBLVersionID:         "2.1",
+		CustomizationID:      "2.0",
+		ProfileID:            "0101",
+		ID:                   fmt.Sprintf("%s-%s", doc.Series, doc.Number),
+		IssueDate:            doc.IssueDate,
+		IssueTime:            time.Now().Format("15:04:05"),
+		DueDate:              doc.DueDate,
+		InvoiceTypeCode:      "0101",
+		DocumentCurrencyCode: doc.Currency,
+		LineCountNumeric:     len(doc.Items),
+		Signature: UBLSignature{
+			ID: fmt.Sprintf("%s-%s", doc.Series, doc.Number),
+			SignatoryParty: UBLSignatoryParty{
+				PartyIdentification: UBLPartyIdentification{
+					ID: UBLIDWithScheme{
+						Value: doc.Issuer.DocumentID,
+					},
+				},
+				PartyName: UBLPartyName{
+					Name: doc.Issuer.Name,
+				},
+			},
+			DigitalSignatureAttachment: UBLDigitalSignatureAttachment{
+				ExternalReference: UBLExternalReference{
+					URI: "#SignatureSP",
 				},
 			},
 		},
-		UBLVersionID: "2.1",
-		CustomizationID: UBLIDWithScheme{
-			SchemeAgencyName: "PE:SUNAT",
-			Value:            "2.0",
-		},
-		ProfileID: UBLIDWithScheme{
-			SchemeAgencyName: "PE:SUNAT",
-			SchemeName:       "Tipo de Operacion",
-			SchemeURI:        "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo51",
-			Value:            "0101",
-		},
-		ID: fmt.Sprintf("%s-%s", doc.Series, doc.Number),
-		IssueDate: doc.IssueDate,
-		IssueTime: "10:30:00",
-		DueDate:   doc.IssueDate,
-		InvoiceTypeCode: UBLTypeCode{
-			ListAgencyName: "PE:SUNAT",
-			ListID:         "0101",
-			ListName:       "Tipo de Documento",
-			ListURI:        "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01",
-			Name:           "Tipo de Operacion",
-			Value:          doc.Type,
-		},
-		DocumentCurrencyCode: UBLIDWithScheme{
-			SchemeAgencyName: "United Nations Economic Commission for Europe",
-			SchemeID:         "ISO 4217 Alpha",
-			SchemeName:       "Currency",
-			Value:            doc.Currency,
-		},
-		LineCountNumeric:       len(doc.Items),
 		AccountingSupplierParty: c.convertParty(doc.Issuer),
 		AccountingCustomerParty: c.convertParty(doc.Customer),
-		PaymentTerms: []UBLPaymentTerms{
-			{
-				ID:             "FormaPago",
-				PaymentMeansID: "Contado",
-			},
-		},
-		TaxTotal:           c.convertTaxTotals(doc.Taxes, doc.Currency),
-		LegalMonetaryTotal: c.convertLegalMonetaryTotal(doc.Totals, doc.Currency),
+		PaymentTerms:           []UBLPaymentTerms{},
+		TaxTotal:               c.convertTaxTotals(doc.Taxes, doc.Currency),
+		LegalMonetaryTotal:     c.convertLegalMonetaryTotal(doc.Totals, doc.Currency),
 		InvoiceLines:       c.convertInvoiceLines(doc.Items, doc.Currency),
 	}
+
+	// Crear el XML con los namespaces correctos
 	xmlData, err := xml.MarshalIndent(invoice, "", "  ")
 	if err != nil {
-		return nil, fmt.Errorf("error marshaling invoice XML: %v", err)
+		return nil, fmt.Errorf("error marshaling XML: %v", err)
 	}
-	// Guardar XML temporal para inspección
-	tempPath := "invoice_pre_firma.xml"
-	err = os.WriteFile(tempPath, append([]byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"), xmlData...), 0644)
-	if err != nil {
-		return nil, fmt.Errorf("error writing temp XML: %v", err)
-	}
-	xmlDeclaration := []byte("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-	return append(xmlDeclaration, xmlData...), nil
+
+	// Agregar la declaración XML y los namespaces
+	xmlWithNamespaces := `<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" 
+         xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" 
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" 
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" 
+         xmlns:ds="http://www.w3.org/2000/09/xmldsig#">` + string(xmlData[strings.Index(string(xmlData), ">")+1:])
+
+	return []byte(xmlWithNamespaces), nil
 }
 
 func (c *UBLConverter) convertToCreditNote(doc *BusinessDocument) ([]byte, error) {
@@ -290,14 +280,9 @@ func (c *UBLConverter) convertToCreditNote(doc *BusinessDocument) ([]byte, error
 		BillingReference:       []UBLBillingReference{},
 		AccountingSupplierParty: c.convertParty(doc.Issuer),
 		AccountingCustomerParty: c.convertParty(doc.Customer),
-		PaymentTerms: []UBLPaymentTerms{
-			{
-				ID:             "FormaPago",
-				PaymentMeansID: "Contado",
-			},
-		},
-		TaxTotal:           c.convertTaxTotals(doc.Taxes, doc.Currency),
-		LegalMonetaryTotal: c.convertLegalMonetaryTotal(doc.Totals, doc.Currency),
+		PaymentTerms:           []UBLPaymentTerms{},
+		TaxTotal:               c.convertTaxTotals(doc.Taxes, doc.Currency),
+		LegalMonetaryTotal:     c.convertLegalMonetaryTotal(doc.Totals, doc.Currency),
 		CreditNoteLines:    c.convertCreditNoteLines(doc.Items, doc.Currency),
 	}
 	if doc.Reference != nil {
@@ -367,14 +352,9 @@ func (c *UBLConverter) convertToDebitNote(doc *BusinessDocument) ([]byte, error)
 		BillingReference:       []UBLBillingReference{},
 		AccountingSupplierParty: c.convertParty(doc.Issuer),
 		AccountingCustomerParty: c.convertParty(doc.Customer),
-		PaymentTerms: []UBLPaymentTerms{
-			{
-				ID:             "FormaPago",
-				PaymentMeansID: "Contado",
-			},
-		},
-		TaxTotal:           c.convertTaxTotals(doc.Taxes, doc.Currency),
-		LegalMonetaryTotal: c.convertLegalMonetaryTotal(doc.Totals, doc.Currency),
+		PaymentTerms:           []UBLPaymentTerms{},
+		TaxTotal:               c.convertTaxTotals(doc.Taxes, doc.Currency),
+		LegalMonetaryTotal:     c.convertLegalMonetaryTotal(doc.Totals, doc.Currency),
 		DebitNoteLines:     c.convertDebitNoteLines(doc.Items, doc.Currency),
 	}
 	if doc.Reference != nil {
@@ -408,66 +388,20 @@ func (c *UBLConverter) convertParty(party Party) UBLParty {
 	if party.DocumentType == "1" {
 		schemeID = "1"
 	}
+	
 	return UBLParty{
-		CustomerAssignedAccountID: party.DocumentID,
-		AdditionalAccountID:       schemeID,
-		PartyIdentification: UBLPartyIdentification{
-			ID: UBLIDWithScheme{
-				SchemeID:         schemeID,
-				SchemeName:       "SUNAT:Identificador de Documento de Identidad",
-				SchemeAgencyName: "PE:SUNAT",
-				Value:            party.DocumentID,
-			},
-		},
 		Party: UBLPartyDetail{
-			// PartyIdentification eliminado
-			PartyName: []UBLPartyName{
-				{Name: party.Name},
-			},
-			RegistrationAddress: UBLRegistrationAddress{
+			PartyIdentification: UBLPartyIdentification{
 				ID: UBLIDWithScheme{
-					SchemeAgencyName: "PE:INEI",
-					SchemeName:       "Ubigeos",
-					Value:            "140101",
-				},
-				AddressTypeCode: UBLIDWithScheme{
+					SchemeID:         schemeID,
+					SchemeName:       "SUNAT:Identificador de Documento de Identidad",
 					SchemeAgencyName: "PE:SUNAT",
-					SchemeName:       "Establecimientos anexos",
-					Value:            "0000",
-				},
-				CityName:         party.Address.City,
-				CountrySubentity: party.Address.Province,
-				District:         party.Address.District,
-				AddressLine: UBLAddressLine{
-					Line: fmt.Sprintf("%s - %s - %s - %s", party.Address.Street, party.Address.District, party.Address.Province, party.Address.Department),
-				},
-				Country: UBLCountry{
-					IdentificationCode: UBLIDWithScheme{
-						SchemeAgencyName: "United Nations Economic Commission for Europe",
-						SchemeID:         "ISO 3166-1",
-						SchemeName:       "Country",
-						Value:            party.Address.Country,
-					},
+					Value:            party.DocumentID,
 				},
 			},
-			PartyTaxScheme: []UBLPartyTaxScheme{
+			PartyName: []UBLPartyName{
 				{
-					RegistrationName: party.Name,
-					CompanyID: UBLIDWithScheme{
-						SchemeAgencyName: "PE:SUNAT",
-						SchemeID:         schemeID,
-						SchemeName:       "SUNAT:Identificador de Documento de Identidad",
-						SchemeURI:        "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06",
-						Value:            party.DocumentID,
-					},
-					TaxScheme: UBLTaxScheme{
-						ID: UBLIDWithScheme{
-							SchemeAgencyName: "PE:SUNAT",
-							SchemeID:         "UN/ECE 5153",
-							SchemeName:       "Codigo de tributos",
-							Value:            "1000",
-						},
-					},
+					Name: party.Name,
 				},
 			},
 			PartyLegalEntity: []UBLPartyLegalEntity{
@@ -510,51 +444,46 @@ func (c *UBLConverter) convertParty(party Party) UBLParty {
 
 func (c *UBLConverter) convertTaxTotals(taxes []TaxTotal, currency string) []UBLTaxTotal {
 	var taxTotals []UBLTaxTotal
-	for _, tax := range taxes {
-		taxTotal := UBLTaxTotal{
+	
+	// IGV
+	if len(taxes) > 0 {
+		taxTotals = append(taxTotals, UBLTaxTotal{
 			TaxAmount: UBLAmountWithCurrency{
 				CurrencyID: currency,
-				Value:      Decimal2(tax.TaxAmount),
+				Value:      Decimal2(taxes[0].TaxAmount),
 			},
 			TaxSubtotals: []UBLTaxSubtotal{
 				{
 					TaxableAmount: UBLAmountWithCurrency{
 						CurrencyID: currency,
-						Value:      Decimal2(tax.TaxBase),
+						Value:      Decimal2(taxes[0].TaxBase),
 					},
 					TaxAmount: UBLAmountWithCurrency{
 						CurrencyID: currency,
-						Value:      Decimal2(tax.TaxAmount),
+						Value:      Decimal2(taxes[0].TaxAmount),
 					},
 					TaxCategory: UBLTaxCategory{
 						ID: UBLIDWithScheme{
 							SchemeAgencyName: "United Nations Economic Commission for Europe",
-							SchemeID:         "UN/ECE 5305",
-							SchemeName:       "Tax Category Identifier",
+							SchemeID:         "UN/ECE 5153",
+							SchemeName:       "Codigo de tributos",
 							Value:            "S",
 						},
-						Percent: tax.TaxRate,
-						TaxExemptionReasonCode: UBLIDWithScheme{
-							SchemeAgencyName: "PE:SUNAT",
-							SchemeName:       "Afectacion del IGV",
-							SchemeURI:        "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo07",
-							Value:          "10",
-						},
+						Percent: taxes[0].TaxRate,
 						TaxScheme: UBLTaxScheme{
 							ID: UBLIDWithScheme{
 								SchemeAgencyName: "PE:SUNAT",
 								SchemeID:         "UN/ECE 5153",
-								Value:            tax.TaxType,
+								SchemeName:       "Codigo de tributos",
+								Value:            "1000",
 							},
-							Name:        c.getTaxName(tax.TaxType),
-							TaxTypeCode: "VAT",
 						},
 					},
 				},
 			},
-		}
-		taxTotals = append(taxTotals, taxTotal)
+		})
 	}
+	
 	return taxTotals
 }
 

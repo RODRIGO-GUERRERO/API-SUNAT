@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" 
+         xmlns:ext="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" 
+         xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" 
+         xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" 
+         xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+  <ext:UBLExtensions><UBLExtensions xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2">
+  <UBLExtension>
+    <ExtensionContent>
+      <Signature xmlns="http://www.w3.org/2000/09/xmldsig#" Id="SignatureSP">
+        <SignedInfo>
+          <CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+          <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+          <Reference URI="">
+            <Transforms>
+              <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+              <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+            </Transforms>
+            <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+            <DigestValue>VHzVRB3zsTEVc2GG0WwEl4erqV+lGWvhkoP5jN1GUtw=</DigestValue>
+          </Reference>
+        </SignedInfo>
+        <SignatureValue>ihuTOm2n/PLmMXf2UNEENljrcoF+ClyMruUz2d9RFzbysDRDS8K7K4LhmGiS1MVH4uE1m8Dlxshd8I7IS3jxRZjzEL4zIAkRE5lZNXaI9jwvvPlhOLi5bmn8gqAwuuyne0ELkhMl8rd5g0rhIICML7ffxOuFeZnoE92qn8CrtP53KLnGdywWPCJFdSqe6J4eI046qirSQ9OwY60IoywIcj9KNzSZzStEW0Tm/pGrUjP+ema30KUjdvjzfNNUtEtlfepkvJDHMXe+BJ36hLZhhmeMJSoboQovdGE0FbZhxdMspK86merTGKwkzrlGoE+qrCo/0p2Pbyo0RV0Kr1SUTA==</SignatureValue>
+        <KeyInfo>
+          <X509Data>
+            <X509Certificate>MIIFnjCCBIagAwIBAgIIA6akYTIEsrwwDQYJKoZIhvcNAQELBQAwRjEkMCIGA1UEAwwbTGxhbWEucGUgU0hBMjU2IFN0YW5kYXJkIENBMREwDwYDVQQKDAhMTEFNQS5QRTELMAkGA1UEBhMCUEUwHhcNMjMwMjI0MjExNzExWhcNMjYwMjIzMjExNzAwWjCCATgxQjBABgNVBAkMOUNBTC4gUEFSUVVFIElORFVTVFJJQUwgTFQuIDQgTVouIEUgWi5JLiBQQVJRVUUgSU5EVVNUUklBTDEuMCwGCSqGSIb3DQEJARYfY2FybG9zLmFycmlvbGFAZ3J1cG9jaGlhcHBlLmNvbTEsMCoGA1UEAwwjU09GVFdBUkUgREUgRkFDVFVSQUNJT04gRUxFQ1RST05JQ0ExLDAqBgNVBAsMI0ZBQ1RVUkEgRUxFQ1RST05JQ0EgUlVDIDIwMTAzMTI5MDYxMSEwHwYDVQQLDBhWYWxpZGFkbyBwb3IgTGxhbWEucGUgRVIxITAfBgNVBAoMGENPTUVSQ0lBTCBMQVZBR05BIFMuQS5DLjETMBEGA1UEBwwKTEFNQkFZRVFVRTELMAkGA1UEBhMCUEUwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCeNnUF1ubEHSYm3fVE7G1KhH01o0r+PJPWG/t0+XLAqmqtgnrOpkBpemu3711jCI///b1/q6lvpeTrcJVR6wBqI1PKGmxMuxI8/Wt2TZ213DqroqZnDcYyIWPOzJCEpau9XVw44Fb9CNqzHiz0yoLjy+pu2ZkTOj2+dlhWGkljOjx+c7/vCBpZL4uPLVrZhrThFIh8fHg8K6HaV0CA3BkkkVshqhCZ2h8m7/3K843EWmTmQc7OrNkmHkuTWyjeSaX3seq4zLlOknS2MX67fyfP9VACkKM51xJ64ztdoDSp4PcxYpnYudHMqRa7KGGsca2sL9FqMaisZzEfeiB3CjbjAgMBAAGjggGaMIIBljAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFF2IW63rZfv+aKLk2W89V3Ki7yuZMGcGCCsGAQUFBwEBBFswWTA1BggrBgEFBQcwAoYpaHR0cDovL2NydC5sbGFtYS5wZS9sbGFtYXBlc3RhbmRhcmRjYS5jZXIwIAYIKwYBBQUHMAGGFGh0dHA6Ly9vY3NwLmxsYW1hLnBlMCoGA1UdEQQjMCGBH2Nhcmxvcy5hcnJpb2xhQGdydXBvY2hpYXBwZS5jb20wRgYDVR0gBD8wPTA7Bg0rBgEEAYOXdwABAAMBMCowKAYIKwYBBQUHAgEWHGh0dHBzOi8vbGxhbWEucGUvcmVwb3NpdG9yeS8wHQYDVR0lBBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMDoGA1UdHwQzMDEwL6AtoCuGKWh0dHA6Ly9jcmwubGxhbWEucGUvbGxhbWFwZXN0YW5kYXJkY2EuY3JsMB0GA1UdDgQWBBTtcyJ6DapoAmqrWQeMwPMQFFnK7DAOBgNVHQ8BAf8EBAMCBsAwDQYJKoZIhvcNAQELBQADggEBAEL+9dAYFfWm3UAzlkK251Y6k7iODmw44inWI1QCEW5XMDCTrCBtrxdOegZHV3OiksxqQKxJHDMTZeS0VQx9EysXDbCT8W6+h8osyK+3NsQ/RE2bWKXOQCDsvBx1fZBvkzxijkivdh532LTAumUCVbKE+NKWPAs2YqhvooUHzgqrCSEUiG59td2obu6rMrDfbQkZg3BtEPazBsyl1RNKfmW3hevZbaAdqDYO0QhXALF5OxiNlebtK9HvnXneO7uFero76feKxEEoguoy08CuO6tcmYbvkFTFSNz+TOF2MvLRJ31d8NXWsqlowk5ILgRWwHIWyaGOrZ0ZPJWk4UMcyxo=</X509Certificate>
+          </X509Data>
+        </KeyInfo>
+      </Signature>
+    </ExtensionContent>
+  </UBLExtension>
+</UBLExtensions>
+  <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>2.0</cbc:CustomizationID>
+  <cbc:ProfileID>0101</cbc:ProfileID>
+  <cbc:ID>F002-222</cbc:ID>
+  <cbc:IssueDate>2024-06-07</cbc:IssueDate>
+  <cbc:IssueTime>19:25:19</cbc:IssueTime>
+  <cbc:InvoiceTypeCode>0101</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode>PEN</cbc:DocumentCurrencyCode>
+  <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+  <cac:Signature>
+    <cbc:ID>F002-222</cbc:ID>
+    <cac:SignatoryParty>
+      <PartyIdentification xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">20607599727</ID>
+      </PartyIdentification>
+      <PartyName xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <Name xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">FACTURA-C S.A.C</Name>
+      </PartyName>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <ExternalReference xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <URI xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">#SignatureSP</URI>
+      </ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
+  <cac:AccountingSupplierParty>
+    <Party xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <PartyIdentification xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="PE:SUNAT" schemeID="6" schemeName="SUNAT:Identificador de Documento de Identidad">20607599727</ID>
+      </PartyIdentification>
+      <PartyName xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <Name xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">FACTURA-C S.A.C</Name>
+      </PartyName>
+      <PartyLegalEntity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <RegistrationName xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">FACTURA-C S.A.C</RegistrationName>
+        <RegistrationAddress xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+          <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="PE:INEI" schemeName="Ubigeos">140101</ID>
+          <AddressTypeCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="PE:SUNAT" schemeName="Establecimientos anexos">0000</AddressTypeCode>
+          <CityName xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">LIMA</CityName>
+          <CountrySubentity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">LIMA</CountrySubentity>
+          <District xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">MIRAFLORES</District>
+          <AddressLine xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+            <Line xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">Av. Principal 123 - MIRAFLORES - LIMA - LIMA</Line>
+          </AddressLine>
+          <Country xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+            <IdentificationCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="United Nations Economic Commission for Europe" schemeID="ISO 3166-1" schemeName="Country">PE</IdentificationCode>
+          </Country>
+        </RegistrationAddress>
+      </PartyLegalEntity>
+      <Contact xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"></Contact>
+    </Party>
+  </cac:AccountingSupplierParty>
+  <cac:AccountingCustomerParty>
+    <Party xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <PartyIdentification xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="PE:SUNAT" schemeID="1" schemeName="SUNAT:Identificador de Documento de Identidad">72928227</ID>
+      </PartyIdentification>
+      <PartyName xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <Name xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">JUAN PEREZ</Name>
+      </PartyName>
+      <PartyLegalEntity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <RegistrationName xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">JUAN PEREZ</RegistrationName>
+        <RegistrationAddress xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+          <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="PE:INEI" schemeName="Ubigeos">140101</ID>
+          <AddressTypeCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="PE:SUNAT" schemeName="Establecimientos anexos">0000</AddressTypeCode>
+          <CityName xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">LIMA</CityName>
+          <CountrySubentity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">LIMA</CountrySubentity>
+          <District xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">SURCO</District>
+          <AddressLine xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+            <Line xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">Calle Secundaria 456 - SURCO - LIMA - LIMA</Line>
+          </AddressLine>
+          <Country xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+            <IdentificationCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="United Nations Economic Commission for Europe" schemeID="ISO 3166-1" schemeName="Country">PE</IdentificationCode>
+          </Country>
+        </RegistrationAddress>
+      </PartyLegalEntity>
+      <Contact xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2"></Contact>
+    </Party>
+  </cac:AccountingCustomerParty>
+  <cac:TaxTotal>
+    <TaxAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">18</TaxAmount>
+    <TaxSubtotal xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <TaxableAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">100</TaxableAmount>
+      <TaxAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">18</TaxAmount>
+      <TaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="United Nations Economic Commission for Europe" schemeID="UN/ECE 5153" schemeName="Codigo de tributos">S</ID>
+        <Percent xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">18</Percent>
+        <TaxExemptionReasonCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2"></TaxExemptionReasonCode>
+        <TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+          <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="PE:SUNAT" schemeID="UN/ECE 5153" schemeName="Codigo de tributos">1000</ID>
+        </TaxScheme>
+      </TaxCategory>
+    </TaxSubtotal>
+  </cac:TaxTotal>
+  <cac:LegalMonetaryTotal>
+    <LineExtensionAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">100</LineExtensionAmount>
+    <TaxInclusiveAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">118</TaxInclusiveAmount>
+    <PayableAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">118</PayableAmount>
+  </cac:LegalMonetaryTotal>
+  <cac:InvoiceLine>
+    <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">1</ID>
+    <InvoicedQuantity xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" unitCode="NIU" unitCodeListAgencyName="United Nations Economic Commission for Europe" unitCodeListID="UN/ECE rec 20">2</InvoicedQuantity>
+    <LineExtensionAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">100</LineExtensionAmount>
+    <PricingReference xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <AlternativeConditionPrice xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <PriceAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">100</PriceAmount>
+        <PriceTypeCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="PE:SUNAT" schemeName="Tipo de Precio" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo16">01</PriceTypeCode>
+      </AlternativeConditionPrice>
+    </PricingReference>
+    <TaxTotal xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <TaxAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">18</TaxAmount>
+      <TaxSubtotal xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <TaxableAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">100</TaxableAmount>
+        <TaxAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">18</TaxAmount>
+        <TaxCategory xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+          <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="United Nations Economic Commission for Europe" schemeID="UN/ECE 5305" schemeName="Tax Category Identifier">S</ID>
+          <Percent xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">18</Percent>
+          <TaxExemptionReasonCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="PE:SUNAT" schemeName="Afectacion del IGV" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo07">10</TaxExemptionReasonCode>
+          <TaxScheme xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+            <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="PE:SUNAT" schemeID="UN/ECE 5153" schemeName="Codigo de tributos">1000</ID>
+            <Name xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">IGV</Name>
+            <TaxTypeCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">VAT</TaxTypeCode>
+          </TaxScheme>
+        </TaxCategory>
+      </TaxSubtotal>
+    </TaxTotal>
+    <Item xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <Description xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">Producto A</Description>
+      <SellersItemIdentification xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <ID xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">1</ID>
+      </SellersItemIdentification>
+      <CommodityClassification xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+        <ItemClassificationCode xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" schemeAgencyName="GS1 US" schemeID="UNSPSC" schemeName="Item Classification">10191509</ItemClassificationCode>
+      </CommodityClassification>
+    </Item>
+    <Price xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2">
+      <PriceAmount xmlns="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" currencyID="PEN">50</PriceAmount>
+    </Price>
+  </cac:InvoiceLine>
+</Invoice>

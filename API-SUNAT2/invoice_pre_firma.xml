@@ -24,15 +24,31 @@
     </ext:UBLExtension>
   </ext:UBLExtensions>
   <cbc:UBLVersionID>2.1</cbc:UBLVersionID>
-  <cbc:CustomizationID schemeAgencyName="PE:SUNAT">2.0</cbc:CustomizationID>
-  <cbc:ProfileID schemeAgencyName="PE:SUNAT" schemeName="Tipo de Operacion" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo51">0101</cbc:ProfileID>
-  <cbc:ID>F001-123456</cbc:ID>
+  <cbc:CustomizationID>2.0</cbc:CustomizationID>
+  <cbc:ProfileID>0101</cbc:ProfileID>
+  <cbc:ID>F001-177</cbc:ID>
   <cbc:IssueDate>2024-06-07</cbc:IssueDate>
   <cbc:IssueTime>10:30:00</cbc:IssueTime>
   <cbc:DueDate>2024-06-07</cbc:DueDate>
-  <cbc:InvoiceTypeCode listAgencyName="PE:SUNAT" listID="0101" listName="Tipo de Documento" listURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo01" name="Tipo de Operacion">01</cbc:InvoiceTypeCode>
-  <cbc:DocumentCurrencyCode schemeAgencyName="United Nations Economic Commission for Europe" schemeID="ISO 4217 Alpha" schemeName="Currency">PEN</cbc:DocumentCurrencyCode>
+  <cbc:InvoiceTypeCode>01</cbc:InvoiceTypeCode>
+  <cbc:DocumentCurrencyCode>PEN</cbc:DocumentCurrencyCode>
   <cbc:LineCountNumeric>1</cbc:LineCountNumeric>
+  <cac:Signature>
+    <cbc:ID>F001-177</cbc:ID>
+    <cac:SignatoryParty>
+      <cac:PartyIdentification>
+        <cbc:ID>20607599727</cbc:ID>
+      </cac:PartyIdentification>
+      <cac:PartyName>
+        <cbc:Name>FACTURA-C S.A.C</cbc:Name>
+      </cac:PartyName>
+    </cac:SignatoryParty>
+    <cac:DigitalSignatureAttachment>
+      <cac:ExternalReference>
+        <cbc:URI>#SignatureSP</cbc:URI>
+      </cac:ExternalReference>
+    </cac:DigitalSignatureAttachment>
+  </cac:Signature>
   <cac:AccountingSupplierParty>
     <cbc:CustomerAssignedAccountID>20607599727</cbc:CustomerAssignedAccountID>
     <cbc:AdditionalAccountID>6</cbc:AdditionalAccountID>
@@ -83,10 +99,10 @@
     </cac:Party>
   </cac:AccountingSupplierParty>
   <cac:AccountingCustomerParty>
-    <cbc:CustomerAssignedAccountID>12345678</cbc:CustomerAssignedAccountID>
+    <cbc:CustomerAssignedAccountID>72928227</cbc:CustomerAssignedAccountID>
     <cbc:AdditionalAccountID>1</cbc:AdditionalAccountID>
     <cac:PartyIdentification>
-      <cbc:ID schemeAgencyName="PE:SUNAT" schemeID="1" schemeName="SUNAT:Identificador de Documento de Identidad">12345678</cbc:ID>
+      <cbc:ID schemeAgencyName="PE:SUNAT" schemeID="1" schemeName="SUNAT:Identificador de Documento de Identidad">72928227</cbc:ID>
     </cac:PartyIdentification>
     <cac:Party>
       <cac:PartyName>
@@ -107,7 +123,7 @@
       </cac:RegistrationAddress>
       <cac:PartyTaxScheme>
         <cbc:RegistrationName>JUAN PEREZ</cbc:RegistrationName>
-        <cbc:CompanyID schemeAgencyName="PE:SUNAT" schemeID="1" schemeName="SUNAT:Identificador de Documento de Identidad" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">12345678</cbc:CompanyID>
+        <cbc:CompanyID schemeAgencyName="PE:SUNAT" schemeID="1" schemeName="SUNAT:Identificador de Documento de Identidad" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo06">72928227</cbc:CompanyID>
         <cac:TaxScheme>
           <cbc:ID schemeAgencyName="PE:SUNAT" schemeID="UN/ECE 5153" schemeName="Codigo de tributos">1000</cbc:ID>
         </cac:TaxScheme>
@@ -131,23 +147,17 @@
       <cac:Contact></cac:Contact>
     </cac:Party>
   </cac:AccountingCustomerParty>
-  <cac:PaymentTerms>
-    <cbc:ID>FormaPago</cbc:ID>
-    <cbc:PaymentMeansID>Contado</cbc:PaymentMeansID>
-  </cac:PaymentTerms>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="PEN">18</cbc:TaxAmount>
     <cac:TaxSubtotal>
       <cbc:TaxableAmount currencyID="PEN">100</cbc:TaxableAmount>
       <cbc:TaxAmount currencyID="PEN">18</cbc:TaxAmount>
       <cac:TaxCategory>
-        <cbc:ID schemeAgencyName="United Nations Economic Commission for Europe" schemeID="UN/ECE 5305" schemeName="Tax Category Identifier">S</cbc:ID>
+        <cbc:ID schemeAgencyName="United Nations Economic Commission for Europe" schemeID="UN/ECE 5153" schemeName="Codigo de tributos">S</cbc:ID>
         <cbc:Percent>18</cbc:Percent>
-        <cbc:TaxExemptionReasonCode schemeAgencyName="PE:SUNAT" schemeName="Afectacion del IGV" schemeURI="urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo07">10</cbc:TaxExemptionReasonCode>
+        <cbc:TaxExemptionReasonCode></cbc:TaxExemptionReasonCode>
         <cac:TaxScheme>
-          <cbc:ID schemeAgencyName="PE:SUNAT" schemeID="UN/ECE 5153">1000</cbc:ID>
-          <cbc:Name>IGV</cbc:Name>
-          <cbc:TaxTypeCode>VAT</cbc:TaxTypeCode>
+          <cbc:ID schemeAgencyName="PE:SUNAT" schemeID="UN/ECE 5153" schemeName="Codigo de tributos">1000</cbc:ID>
         </cac:TaxScheme>
       </cac:TaxCategory>
     </cac:TaxSubtotal>

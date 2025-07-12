@@ -86,22 +86,18 @@ type DocumentReference struct {
 // Estructuras UBL 2.1 XML
 type UBLInvoice struct {
 	XMLName                xml.Name               `xml:"Invoice"`
-	Xmlns                  string                 `xml:"xmlns,attr"`
-	XmlnsCbc               string                 `xml:"xmlns:cbc,attr"`
-	XmlnsCac               string                 `xml:"xmlns:cac,attr"`
-	XmlnsExt               string                 `xml:"xmlns:ext,attr"`
-	XmlnsDs                string                 `xml:"xmlns:ds,attr"`
 	UBLExtensions          *UBLExtensions         `xml:"ext:UBLExtensions"`
 	UBLVersionID           string                 `xml:"cbc:UBLVersionID"`
-	CustomizationID        UBLIDWithScheme        `xml:"cbc:CustomizationID"`
-	ProfileID              UBLIDWithScheme        `xml:"cbc:ProfileID"`
+	CustomizationID        string                 `xml:"cbc:CustomizationID"`
+	ProfileID              string                 `xml:"cbc:ProfileID"`
 	ID                     string                 `xml:"cbc:ID"`
 	IssueDate              string                 `xml:"cbc:IssueDate"`
 	IssueTime              string                 `xml:"cbc:IssueTime,omitempty"`
 	DueDate                string                 `xml:"cbc:DueDate,omitempty"`
-	InvoiceTypeCode        UBLTypeCode            `xml:"cbc:InvoiceTypeCode"`
-	DocumentCurrencyCode   UBLIDWithScheme        `xml:"cbc:DocumentCurrencyCode"`
+	InvoiceTypeCode        string                 `xml:"cbc:InvoiceTypeCode"`
+	DocumentCurrencyCode   string                 `xml:"cbc:DocumentCurrencyCode"`
 	LineCountNumeric       int                    `xml:"cbc:LineCountNumeric"`
+	Signature              UBLSignature           `xml:"cac:Signature"`
 	AccountingSupplierParty UBLParty              `xml:"cac:AccountingSupplierParty"`
 	AccountingCustomerParty UBLParty              `xml:"cac:AccountingCustomerParty"`
 	PaymentTerms           []UBLPaymentTerms      `xml:"cac:PaymentTerms,omitempty"`
@@ -165,7 +161,7 @@ type UBLDebitNote struct {
 }
 
 type UBLExtensions struct {
-	UBLExtension UBLExtension `xml:"ext:UBLExtension"`
+	UBLExtension []UBLExtension `xml:"ext:UBLExtension"`
 }
 
 type UBLExtension struct {
@@ -178,22 +174,18 @@ type ExtensionContent struct {
 
 // Modificar UBLParty para SUNAT
 type UBLParty struct {
-	CustomerAssignedAccountID string `xml:"cbc:CustomerAssignedAccountID"`
-	AdditionalAccountID       string `xml:"cbc:AdditionalAccountID"`
-	PartyIdentification      UBLPartyIdentification `xml:"cac:PartyIdentification"`
-	Party                    UBLPartyDetail `xml:"cac:Party"`
+	Party UBLPartyDetail `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 Party"`
 }
 
 type UBLPartyDetail struct {
-	PartyName           []UBLPartyName           `xml:"cac:PartyName"`
-	RegistrationAddress UBLRegistrationAddress   `xml:"cac:RegistrationAddress"`
-	PartyTaxScheme      []UBLPartyTaxScheme      `xml:"cac:PartyTaxScheme"`
-	PartyLegalEntity    []UBLPartyLegalEntity    `xml:"cac:PartyLegalEntity"`
-	Contact             *UBLContact              `xml:"cac:Contact,omitempty"`
+	PartyIdentification UBLPartyIdentification `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 PartyIdentification"`
+	PartyName           []UBLPartyName           `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 PartyName"`
+	PartyLegalEntity    []UBLPartyLegalEntity    `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 PartyLegalEntity"`
+	Contact             *UBLContact              `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 Contact,omitempty"`
 }
 
 type UBLPartyIdentification struct {
-	ID UBLIDWithScheme `xml:"cbc:ID"`
+	ID UBLIDWithScheme `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ID"`
 }
 
 type UBLIDWithScheme struct {
@@ -205,51 +197,51 @@ type UBLIDWithScheme struct {
 }
 
 type UBLPartyName struct {
-	Name string `xml:"cbc:Name"`
+	Name string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 Name"`
 }
 
 type UBLRegistrationAddress struct {
-	ID                 UBLIDWithScheme `xml:"cbc:ID,omitempty"`
-	AddressTypeCode    UBLIDWithScheme `xml:"cbc:AddressTypeCode,omitempty"`
-	CityName           string          `xml:"cbc:CityName"`
-	CountrySubentity   string          `xml:"cbc:CountrySubentity"`
-	District           string          `xml:"cbc:District"`
-	AddressLine        UBLAddressLine  `xml:"cac:AddressLine"`
-	Country            UBLCountry      `xml:"cac:Country"`
+	ID                 UBLIDWithScheme `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ID,omitempty"`
+	AddressTypeCode    UBLIDWithScheme `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 AddressTypeCode,omitempty"`
+	CityName           string          `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 CityName"`
+	CountrySubentity   string          `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 CountrySubentity"`
+	District           string          `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 District"`
+	AddressLine        UBLAddressLine  `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 AddressLine"`
+	Country            UBLCountry      `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 Country"`
 }
 
 type UBLAddressLine struct {
-	Line string `xml:"cbc:Line"`
+	Line string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 Line"`
 }
 
 type UBLCountry struct {
-	IdentificationCode UBLIDWithScheme `xml:"cbc:IdentificationCode"`
+	IdentificationCode UBLIDWithScheme `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 IdentificationCode"`
 }
 
 type UBLPartyTaxScheme struct {
-	RegistrationName string          `xml:"cbc:RegistrationName"`
-	CompanyID        UBLIDWithScheme `xml:"cbc:CompanyID"`
-	TaxScheme        UBLTaxScheme    `xml:"cac:TaxScheme"`
+	RegistrationName string          `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 RegistrationName"`
+	CompanyID        UBLIDWithScheme `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 CompanyID"`
+	TaxScheme        UBLTaxScheme    `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 TaxScheme"`
 }
 
 type UBLTaxScheme struct {
-	ID           UBLIDWithScheme `xml:"cbc:ID"`
-	Name         string          `xml:"cbc:Name,omitempty"`
-	TaxTypeCode  string          `xml:"cbc:TaxTypeCode,omitempty"`
+	ID           UBLIDWithScheme `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ID"`
+	Name         string          `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 Name,omitempty"`
+	TaxTypeCode  string          `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 TaxTypeCode,omitempty"`
 }
 
 type UBLPartyLegalEntity struct {
-	RegistrationName     string                `xml:"cbc:RegistrationName"`
-	RegistrationAddress  UBLRegistrationAddress `xml:"cac:RegistrationAddress"`
+	RegistrationName     string                `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 RegistrationName"`
+	RegistrationAddress  UBLRegistrationAddress `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 RegistrationAddress"`
 }
 
 type UBLContact struct {
-	Name string `xml:"cbc:Name,omitempty"`
+	Name string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 Name,omitempty"`
 }
 
 type UBLTaxTotal struct {
-	TaxAmount     UBLAmountWithCurrency `xml:"cbc:TaxAmount"`
-	TaxSubtotals  []UBLTaxSubtotal      `xml:"cac:TaxSubtotal"`
+	TaxAmount     UBLAmountWithCurrency `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 TaxAmount"`
+	TaxSubtotals  []UBLTaxSubtotal      `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 TaxSubtotal"`
 }
 
 // Tipo para serializar siempre con dos decimales
@@ -266,42 +258,42 @@ type UBLAmountWithCurrency struct {
 }
 
 type UBLTaxSubtotal struct {
-	TaxableAmount UBLAmountWithCurrency `xml:"cbc:TaxableAmount"`
-	TaxAmount     UBLAmountWithCurrency `xml:"cbc:TaxAmount"`
-	TaxCategory   UBLTaxCategory        `xml:"cac:TaxCategory"`
+	TaxableAmount UBLAmountWithCurrency `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 TaxableAmount"`
+	TaxAmount     UBLAmountWithCurrency `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 TaxAmount"`
+	TaxCategory   UBLTaxCategory        `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 TaxCategory"`
 }
 
 type UBLTaxCategory struct {
-	ID                    UBLIDWithScheme `xml:"cbc:ID"`
-	Percent               float64         `xml:"cbc:Percent,omitempty"`
-	TaxExemptionReasonCode UBLIDWithScheme `xml:"cbc:TaxExemptionReasonCode,omitempty"`
-	TaxScheme             UBLTaxScheme    `xml:"cac:TaxScheme"`
+	ID                    UBLIDWithScheme `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ID"`
+	Percent               float64         `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 Percent,omitempty"`
+	TaxExemptionReasonCode UBLIDWithScheme `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 TaxExemptionReasonCode,omitempty"`
+	TaxScheme             UBLTaxScheme    `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 TaxScheme"`
 }
 
 type UBLLegalMonetaryTotal struct {
-	LineExtensionAmount UBLAmountWithCurrency `xml:"cbc:LineExtensionAmount"`
-	TaxInclusiveAmount  UBLAmountWithCurrency `xml:"cbc:TaxInclusiveAmount"`
-	PayableAmount       UBLAmountWithCurrency `xml:"cbc:PayableAmount"`
+	LineExtensionAmount UBLAmountWithCurrency `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 LineExtensionAmount"`
+	TaxInclusiveAmount  UBLAmountWithCurrency `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 TaxInclusiveAmount"`
+	PayableAmount       UBLAmountWithCurrency `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 PayableAmount"`
 }
 
 type UBLInvoiceLine struct {
-	ID                  string                `xml:"cbc:ID"`
-	InvoicedQuantity    UBLQuantityWithUnit   `xml:"cbc:InvoicedQuantity"`
-	LineExtensionAmount UBLAmountWithCurrency `xml:"cbc:LineExtensionAmount"`
-	PricingReference    *UBLPricingReference  `xml:"cac:PricingReference,omitempty"`
-	TaxTotal            []UBLTaxTotal         `xml:"cac:TaxTotal"`
-	Item                UBLItem               `xml:"cac:Item"`
-	Price               UBLPrice              `xml:"cac:Price"`
+	ID                  string                `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ID"`
+	InvoicedQuantity    UBLQuantityWithUnit   `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 InvoicedQuantity"`
+	LineExtensionAmount UBLAmountWithCurrency `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 LineExtensionAmount"`
+	PricingReference    *UBLPricingReference  `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 PricingReference,omitempty"`
+	TaxTotal            []UBLTaxTotal         `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 TaxTotal"`
+	Item                UBLItem               `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 Item"`
+	Price               UBLPrice              `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 Price"`
 }
 
 type UBLCreditNoteLine struct {
-	ID                    string                `xml:"cbc:ID"`
-	CreditedQuantity      UBLQuantityWithUnit   `xml:"cbc:CreditedQuantity"`
-	LineExtensionAmount   UBLAmountWithCurrency `xml:"cbc:LineExtensionAmount"`
-	PricingReference      *UBLPricingReference  `xml:"cac:PricingReference,omitempty"`
-	TaxTotal              []UBLTaxTotal         `xml:"cac:TaxTotal"`
-	Item                  UBLItem               `xml:"cac:Item"`
-	Price                 UBLPrice              `xml:"cac:Price"`
+	ID                    string                `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ID"`
+	CreditedQuantity      UBLQuantityWithUnit   `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 CreditedQuantity"`
+	LineExtensionAmount   UBLAmountWithCurrency `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 LineExtensionAmount"`
+	PricingReference      *UBLPricingReference  `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 PricingReference,omitempty"`
+	TaxTotal              []UBLTaxTotal         `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 TaxTotal"`
+	Item                  UBLItem               `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 Item"`
+	Price                 UBLPrice              `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 Price"`
 }
 
 type UBLQuantityWithUnit struct {
@@ -312,46 +304,46 @@ type UBLQuantityWithUnit struct {
 }
 
 type UBLPricingReference struct {
-	AlternativeConditionPrice UBLAlternativeConditionPrice `xml:"cac:AlternativeConditionPrice"`
+	AlternativeConditionPrice UBLAlternativeConditionPrice `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 AlternativeConditionPrice"`
 }
 
 type UBLAlternativeConditionPrice struct {
-	PriceAmount   UBLAmountWithCurrency `xml:"cbc:PriceAmount"`
-	PriceTypeCode UBLIDWithScheme       `xml:"cbc:PriceTypeCode"`
+	PriceAmount   UBLAmountWithCurrency `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 PriceAmount"`
+	PriceTypeCode UBLIDWithScheme       `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 PriceTypeCode"`
 }
 
 type UBLPrice struct {
-	PriceAmount UBLAmountWithCurrency `xml:"cbc:PriceAmount"`
+	PriceAmount UBLAmountWithCurrency `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 PriceAmount"`
 }
 
 type UBLItem struct {
-	Description              string                    `xml:"cbc:Description"`
-	SellersItemIdentification *UBLSellersItemIdentification `xml:"cac:SellersItemIdentification,omitempty"`
-	CommodityClassification  *UBLCommodityClassification  `xml:"cac:CommodityClassification,omitempty"`
+	Description              string                    `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 Description"`
+	SellersItemIdentification *UBLSellersItemIdentification `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 SellersItemIdentification,omitempty"`
+	CommodityClassification  *UBLCommodityClassification  `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 CommodityClassification,omitempty"`
 }
 
 type UBLSellersItemIdentification struct {
-	ID string `xml:"cbc:ID"`
+	ID string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ID"`
 }
 
 type UBLCommodityClassification struct {
-	ItemClassificationCode UBLIDWithScheme `xml:"cbc:ItemClassificationCode"`
+	ItemClassificationCode UBLIDWithScheme `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ItemClassificationCode"`
 }
 
 type UBLDiscrepancyResponse struct {
-	ReferenceID string `xml:"cbc:ReferenceID"`
-	ResponseCode string `xml:"cbc:ResponseCode"`
-	Description string `xml:"cbc:Description"`
+	ReferenceID string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ReferenceID"`
+	ResponseCode string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ResponseCode"`
+	Description string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 Description"`
 }
 
 type UBLBillingReference struct {
-	InvoiceDocumentReference UBLDocumentReference `xml:"cac:InvoiceDocumentReference"`
+	InvoiceDocumentReference UBLDocumentReference `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 InvoiceDocumentReference"`
 }
 
 type UBLDocumentReference struct {
-	ID        string `xml:"cbc:ID"`
-	IssueDate string `xml:"cbc:IssueDate"`
-	DocumentTypeCode string `xml:"cbc:DocumentTypeCode"`
+	ID        string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ID"`
+	IssueDate string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 IssueDate"`
+	DocumentTypeCode string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 DocumentTypeCode"`
 }
 
 type UBLTypeCode struct {
@@ -364,22 +356,43 @@ type UBLTypeCode struct {
 }
 
 type UBLPaymentTerms struct {
-	ID              string `xml:"cbc:ID"`
-	PaymentMeansID  string `xml:"cbc:PaymentMeansID"`
+	ID              string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ID"`
+	PaymentMeansID  string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 PaymentMeansID"`
 }
 
 type UBLDelivery struct {
-	DeliveryDate string `xml:"cbc:DeliveryDate"`
+	DeliveryDate string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 DeliveryDate"`
 }
 
 type UBLDebitNoteLine struct {
-	ID                    string                `xml:"cbc:ID"`
-	DebitedQuantity       UBLQuantityWithUnit   `xml:"cbc:DebitedQuantity"`
-	LineExtensionAmount   UBLAmountWithCurrency `xml:"cbc:LineExtensionAmount"`
-	PricingReference      *UBLPricingReference  `xml:"cac:PricingReference,omitempty"`
-	TaxTotal              []UBLTaxTotal         `xml:"cac:TaxTotal"`
-	Item                  UBLItem               `xml:"cac:Item"`
-	Price                 UBLPrice              `xml:"cac:Price"`
+	ID                    string                `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 ID"`
+	DebitedQuantity       UBLQuantityWithUnit   `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 DebitedQuantity"`
+	LineExtensionAmount   UBLAmountWithCurrency `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 LineExtensionAmount"`
+	PricingReference      *UBLPricingReference  `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 PricingReference,omitempty"`
+	TaxTotal              []UBLTaxTotal         `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 TaxTotal"`
+	Item                  UBLItem               `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 Item"`
+	Price                 UBLPrice              `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 Price"`
+}
+
+// Estructuras para la sección <cac:Signature>
+type UBLSignature struct {
+	XMLName xml.Name `xml:"cac:Signature"`
+	ID      string   `xml:"cbc:ID"`
+	SignatoryParty UBLSignatoryParty `xml:"cac:SignatoryParty"`
+	DigitalSignatureAttachment UBLDigitalSignatureAttachment `xml:"cac:DigitalSignatureAttachment"`
+}
+
+type UBLSignatoryParty struct {
+	PartyIdentification UBLPartyIdentification `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 PartyIdentification"`
+	PartyName          UBLPartyName           `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 PartyName"`
+}
+
+type UBLDigitalSignatureAttachment struct {
+	ExternalReference UBLExternalReference `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2 ExternalReference"`
+}
+
+type UBLExternalReference struct {
+	URI string `xml:"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2 URI"`
 }
 
 // Estructura para la firma digital
@@ -435,8 +448,6 @@ type KeyInfo struct {
 type X509Data struct {
 	X509Certificate string `xml:"ds:X509Certificate"`
 }
-
-// Eliminar la definición de UBLSignature y sus dependencias
 
 type APIResponse struct {
 	Status        string                 `json:"status"`
